@@ -6,6 +6,7 @@ use App\Models\Post;
 use App\Http\Resources\PostResource;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
+use Illuminate\Support\Facades\Validator;
 
 class PostController extends Controller
 {
@@ -17,12 +18,22 @@ class PostController extends Controller
     public function store(Request $request) {
         // if($request->ajax()) {
             try {                
-
                 //Validation
-                $this->validate($request, [
+                $validator = Validator::make($request->all(), [
                     'title' => 'required|string|max:255',
                     'description' => 'required|string|max:255',
+                ],
+                [
+                    'title.required' => 'El título es requerido.',
+                    'description.required'=> 'La descripción es requerida.',
+                    'title.string' => 'El título debe ser de tipo texto.',
+                    'description.string' => 'La descripción debe ser de tipo texto.',
+
                 ]);
+
+                if ($validator->fails()) {
+                    return response()->json(['message' => $validator->errors()->first()], 400);
+                }
 
                 //Slug
                 $slug = preg_replace('/[^A-zA-z0-9]/','-', $request->title);
@@ -30,7 +41,7 @@ class PostController extends Controller
 
                 //Save new entry
                 $post = new Post;
-                $post->user_id = 1;
+                $post->user_id = $request->user_id;
                 $post->title = $request->title;
                 $post->slug = $slug;
                 $post->description = $request->description;
@@ -50,20 +61,30 @@ class PostController extends Controller
     }
 
     public function update(Request $request, Post $post) {
-        if($request->ajax()) {
+        // if($request->ajax()) {
             try {
-                //Validation
-                $this->validate($request, [
+                $validator = Validator::make($request->all(), [
                     'title' => 'required|string|max:255',
                     'description' => 'required|string|max:255',
+                ],
+                [
+                    'title.required' => 'El título es requerido.',
+                    'description.required'=> 'La descripción es requerida.',
+                    'title.string' => 'El título debe ser de tipo texto.',
+                    'description.string' => 'La descripción debe ser de tipo texto.',
+
                 ]);
+
+
+                if ($validator->fails()) {
+                    return response()->json(['message' => $validator->errors()->first()], 400);
+                }
 
                 //Slug
                 $slug = preg_replace('/[^A-zA-z0-9]/','-', $request->title);
                 $slug = strtolower($slug);
 
                 //Save new entry
-                $post->user_id = 1;
                 $post->title = $request->title;
                 $post->slug = $slug;
                 $post->description = $request->description;
@@ -79,7 +100,7 @@ class PostController extends Controller
                     $error->validator->errors()
                 );
             }
-        }
+        // }
     }
 
     public function show(Post $post) {

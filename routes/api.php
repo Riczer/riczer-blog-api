@@ -22,6 +22,7 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
 
 //Users
 Route::post('user', [UserController::class, 'store']);
+Route::post('auth/login', [UserController::class, 'login']);
 
 //Posts
 Route::post('post', [PostController::class, 'store']);
